@@ -4,11 +4,13 @@ import com.example.bootjpa2.Alien;
 import com.example.bootjpa2.dao.AlienRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-@Controller
+import java.util.List;
+import java.util.Optional;
+
+@RestController
 public class AlienController {
 
     @Autowired
@@ -18,37 +20,31 @@ public class AlienController {
     public String home(){
         return "home.jsp";
     }
-    @RequestMapping("/addAlien")
-    public String addAlien(Alien alien){
+    @DeleteMapping("/alien/{aid}")
+    public String  deleteAlien(@PathVariable int aid){
+        Alien a=repo.getOne(aid);
+        repo.delete(a);
+        return "deleted";
+    }
+    @PutMapping(path = "/alien")
+    public String updateAlien(@RequestBody Alien alien){
         repo.save(alien);
-        return "home.jsp";
+        return "updated";
     }
-    @RequestMapping("/getAlien")
-    public ModelAndView getAlien(@RequestParam int aid){
-        ModelAndView mv=new ModelAndView("showAlien.jsp");
-        Alien alien=repo.findById(aid).orElse(new Alien());
-        System.out.println(repo.findByTech("java"));
-        System.out.println(repo.findByTechSorted("java"));
-        mv.addObject(alien);
-        return mv;
-    }
-    @RequestMapping("/updateAlien")
-    public String updateAlien(Alien alien){
-        repo.deleteById(alien.getAid());
+    @PostMapping("/alien")
+    public Alien addAlien(Alien alien){
         repo.save(alien);
-        return "home.jsp";
+        return alien;
     }
-    @RequestMapping("/deleteAlien")
-    public String deleteAlien(@RequestParam int aid){
-        repo.deleteById(aid);
-        return "home.jsp";
+
+    @GetMapping("/aliens")
+    public List<Alien> getAliens(){
+        return repo.findAll();
     }
-//    @RequestMapping("/findByTech")
-//    public ModelAndView  findByTech(@RequestParam String tech){
-//        ModelAndView mv=new ModelAndView("showAlien.jsp");
-//        Alien alien=repo.findById(aid).orElse(new Alien());
-//        repo.findByTech(tech);
-//        mv.addObject(alien);
-//        return mv;
-//    }
+
+    @RequestMapping("/alien/{aid}")
+    public Optional<Alien> getAliens(@PathVariable int aid){
+        return repo.findById(aid);
+    }
+
 }
